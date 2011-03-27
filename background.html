@@ -1,0 +1,80 @@
+<html>
+<head>
+<script>
+    var tabs = [];
+    
+    function getTabInfos(tab) {
+        if (!tabs[tab.id]) {
+            tabs[tab.id] = {
+                url: tab.url,
+                disabled: !!tab.url.match(/\?nocache/)
+            };
+        }
+        return tabs[tab.id];
+    }
+    
+    function updateIcon() {
+        chrome.tabs.getSelected(null, function(tab) {
+            var tabInfos = getTabInfos(tab);
+            if(tabInfos.disabled === true) {
+                chrome.browserAction.setIcon({path:"cache-disabled.png"});
+                chrome.browserAction.setTitle({title:"Restore stupid browser cache!"});
+                return;
+            }
+            chrome.browserAction.setIcon({path:"cache-enabled.png"});
+            chrome.browserAction.setTitle({title: "Get rid of this fucking browser cache!"});
+        });
+    }
+    
+    function disableCache(tab){
+        var tabInfos = getTabInfos(tab);
+        if (!tabInfos.url.match(/http:\/\//)) {
+            return;
+        }
+        tabInfos.url = tab.url + '?nocache';
+        tabInfos.disabled = true;
+        updateIcon();
+        chrome.tabs.executeScript(tab.id, {file: 'disable.js'});
+    }
+    
+    function enableCache(tab) {
+        var tabInfos = getTabInfos(tab);
+        if (!tabInfos.url.match(/http:\/\//)) {
+            return;
+        }
+        tabInfos.url = tab.url.replace('?nocache','');
+        tabInfos.disabled = false;
+        updateIcon();
+        chrome.tabs.executeScript(tab.id, {file: 'enable.js'});
+    }
+    
+    function toggleDisableCache() {
+        chrome.tabs.getSelected(null, function(tab) {
+            var tabInfos = getTabInfos(tab);
+            if (tabInfos.disabled === false) {
+                disableCache(tab);
+                return;
+            } 
+            enableCache(tab);
+        });
+    }
+    
+    function onTabUpdate(id, status, tab) {
+        var tabInfos = getTabInfos(tab);
+        if (tabInfos.disabled && !tab.url.match(/\?nocache/)) {
+            disableCache(tab);
+            return;
+        }
+        if (tabInfos.disabled === false && !!tab.url.match(/\?nocache/)) {
+            enableCache(tab);
+            return;
+        }
+    }
+
+    chrome.browserAction.onClicked.addListener(toggleDisableCache);
+    chrome.tabs.onSelectionChanged.addListener(updateIcon);
+    chrome.tabs.onUpdated.addListener(onTabUpdate);
+    updateIcon();
+</script>
+</head>
+</html>

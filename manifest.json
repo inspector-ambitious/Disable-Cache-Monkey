@@ -1,0 +1,12 @@
+{
+  "name": "Disable browser cache monkey.",
+  "version": "1.0",
+  "background_page": "background.html",
+  "permissions": [
+    "tabs",
+    "http://*/*"
+  ],
+  "browser_action": {
+      "name": "Click to disable cache"
+  }
+}
