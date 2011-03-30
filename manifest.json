@@ -8,5 +8,6 @@
   ],
   "browser_action": {
       "name": "Click to disable cache"
-  }
+  },
+  "options_page": "options.html"
 }

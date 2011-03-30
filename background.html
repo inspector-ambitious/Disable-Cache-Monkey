@@ -13,10 +13,20 @@
         return tabs[tab.id];
     }
     
+    function isInList(url) {
+        var urls = localStorage['urls'] ? JSON.parse(localStorage['urls']) : [];
+        for (var i = 0; i < urls.length; i++) {
+            if(url.match(urls[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     function updateIcon() {
         chrome.tabs.getSelected(null, function(tab) {
             var tabInfos = getTabInfos(tab);
-            if(tabInfos.disabled === true) {
+            if (tabInfos.disabled === true) {
                 chrome.browserAction.setIcon({path:"cache-disabled.png"});
                 chrome.browserAction.setTitle({title:"Restore stupid browser cache!"});
                 return;
@@ -63,6 +73,10 @@
     
     function onTabUpdate(id, status, tab) {
         var tabInfos = getTabInfos(tab);
+        if (isInList(tab.url)) {
+            disableCache(tab);
+            return;
+        }
         if (tabInfos.disabled && !tab.url.match(/\?nocache/)) {
             disableCache(tab);
             return;
