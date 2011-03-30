@@ -28,7 +28,7 @@
     
     function disableCache(tab){
         var tabInfos = getTabInfos(tab);
-        if (!tabInfos.url.match(/http:\/\//)) {
+        if (!tab.url.match(/http:\/\//)) {
             return;
         }
         tabInfos.url = tab.url + '?nocache';
@@ -39,7 +39,7 @@
     
     function enableCache(tab) {
         var tabInfos = getTabInfos(tab);
-        if (!tabInfos.url.match(/http:\/\//)) {
+        if (!tab.url.match(/http:\/\//)) {
             return;
         }
         tabInfos.url = tab.url.replace('?nocache','');
@@ -50,12 +50,14 @@
     
     function toggleDisableCache() {
         chrome.tabs.getSelected(null, function(tab) {
-            var tabInfos = getTabInfos(tab);
-            if (tabInfos.disabled === false) {
-                disableCache(tab);
-                return;
-            } 
-            enableCache(tab);
+            if (tab) {
+                var tabInfos = getTabInfos(tab);
+                if (tabInfos.disabled === false) {
+                    disableCache(tab);
+                    return;
+                } 
+                enableCache(tab);
+            }
         });
     }
     
